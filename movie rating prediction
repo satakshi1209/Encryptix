@@ -1,0 +1,42 @@
+# Import necessary libraries
+import pandas as pd
+from surprise import SVD, Dataset, Reader
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Load the dataset
+# Replace 'imdb_indian_movies.csv' with the actual downloaded file name
+df = pd.read_csv('imdb_indian_movies.csv')
+
+# Inspect the dataset to find user-movie-rating information
+print(df.head())
+
+# Assume the dataset contains the following columns: 'userId', 'movieId', 'rating'
+# Replace these column names with actual ones from the dataset
+df = df[['userId', 'movieId', 'rating']]  # Adjust based on actual dataset columns
+
+# Convert the data to the Surprise format
+reader = Reader(rating_scale=(1, 10))  # Adjust rating scale based on the dataset
+data = Dataset.load_from_df(df[['userId', 'movieId', 'rating']], reader)
+
+# Train-test split
+trainset, testset = train_test_split(data, test_size=0.2)
+
+# Use SVD (Singular Value Decomposition) algorithm for collaborative filtering
+model = SVD()
+
+# Train the model
+model.fit(trainset)
+
+# Test the model on the testset
+predictions = model.test(testset)
+
+# Evaluate the accuracy using RMSE
+accuracy.rmse(predictions)
+
+# Example: Predict rating for a specific user and movie
+uid = str(1)  # Example user ID (replace with real user)
+iid = str(100)  # Example movie ID (replace with real movie)
+
+pred = model.predict(uid, iid)
+print(f"Predicted rating for User {uid} on Movie {iid}: {pred.est:.2f}")
